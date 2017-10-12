@@ -17,10 +17,12 @@ class PictureViewController: UIViewController, UIImagePickerControllerDelegate, 
     @IBOutlet weak var nextButton: UIButton!
     
     var imagePicker = UIImagePickerController()
+    var uuid = NSUUID().uuidString
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        nextButton.isEnabled = false
         imagePicker.delegate = self
     }
     
@@ -32,11 +34,14 @@ class PictureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         imageView.backgroundColor = UIColor.clear
         
+        nextButton.isEnabled = true
+        
         imagePicker.dismiss(animated: true, completion: nil)
+        
     }
     
     @IBAction func cameraTapped(_ sender: Any) {
-        imagePicker.sourceType = .savedPhotosAlbum
+        imagePicker.sourceType = .camera
         
         present(imagePicker, animated: true, completion: nil)
     }
@@ -53,7 +58,7 @@ class PictureViewController: UIViewController, UIImagePickerControllerDelegate, 
         
         print("Attempting to upload image")
         // Choose image filename and data to save
-        imagesFolder.child("\(NSUUID().uuidString).jpg").putData(imageData, metadata: nil) { (metadata, error) in
+        imagesFolder.child("\(uuid).jpg").putData(imageData, metadata: nil) { (metadata, error) in
             if error != nil {
                 print("#######################")
                 print("We had an error uploading the image: \(error)")
@@ -62,11 +67,15 @@ class PictureViewController: UIViewController, UIImagePickerControllerDelegate, 
                 print(metadata?.downloadURL())
                 
                 // If no error uploading, move on to next view controller
-                self.performSegue(withIdentifier: "selectUserSegue", sender: nil)
+                self.performSegue(withIdentifier: "selectUserSegue", sender: metadata?.downloadURL()!.absoluteString)
             }
         }
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let nextVC = segue.destination as! selectUserViewController
+        nextVC.imageURL = sender as! String
+        nextVC.descrip = descriptionTextField.text!
+        nextVC.uuid = uuid
         
     }
     

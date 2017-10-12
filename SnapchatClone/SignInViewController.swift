@@ -21,12 +21,16 @@ class SignInViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        
     }
     
     
     @IBAction func signInUpTapped(_ sender: Any) {
         
         // Attempt to sign in to a Firebase account using email and password
+        // This function provides the user object result, and an error object
+        // The user object contains information like the user's unique ID, and their email
         Auth.auth().signIn(withEmail: emailTextField.text!, password: passwordTextField.text!) { (user, error) in
             print("We tried to sign in")
             
@@ -47,6 +51,10 @@ class SignInViewController: UIViewController {
                         // If there was not an error, the user was created successfully
                         print("#########################################")
                         print("User created successfully")
+                        
+                        // Add the user email to the database list of users
+                        Database.database().reference().child("users").child(user!.uid).child("email").setValue(user!.email!)
+                        
                         self.performSegue(withIdentifier: "signInSegue", sender: nil)
                         
                     }
